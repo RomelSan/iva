@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script>
+$(document).ready(function()
+	{
+		$("#factura_total").keyup(function()
+			{
+				// $('#factura_total').text('New Title Goes Here');
+				result_01 = $("#factura_total").val();
+				$('#retrieve_data').text(result_01);
+			});
+	});
+</script>
+</head>
+<body>
+
+<p>Calcular Impuestos</p>
+Subtotal de Factura:
+<input id="factura_total" type="text">
+
+<p>Result: <div id="retrieve_data"></div></p>
+
+</body>
+</html>

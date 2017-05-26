@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<meta charset="utf-8" /> 
+<html>
+<head>
+<style type="text/css">
+input:read-only {
+    background-color: #F8F8FF;
+}
+input:-moz-read-only { /* For Firefox */
+    background-color: #F8F8FF;
+}
+br
+{   content: "A" !important;
+    display: block !important;
+    margin-bottom: 0.5em !important;
+}
+</style>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script>
+$(document).ready(function()
+	{
+		$("#invoice_subtotal").keyup(function()
+			{
+				calcIVA();
+			});
+			
+		$("#invoice_pay_total2").keyup(function()
+			{
+				calcSubTotal();
+			});
+	});
+function calcIVA() {
+		// User Input
+		data_subtotal = $("#invoice_subtotal").val(); // get data from box: invoice_subtotal
+		data_iva = $("#invoice_iva").val(); // get data from box: invoice_iva  %IVA
+		data_ret_iva = $("#invoice_ret_iva").val(); // get data from box: invoice_ret_iva    %Retencion IVA
+		data_ret_rentas = $("#invoice_ret_rentas").val(); // get data from box: invoice_ret_rentas %Retencion Rentas
+		
+		// IVA Calc
+		var calc_iva = data_subtotal * data_iva; // calc IVA
+		var calc_subtotal_iva = parseFloat(data_subtotal) + parseFloat(calc_iva); // subtotal + iva
+		
+		// Retención calc
+		var calc_retiva = parseFloat(calc_iva) * parseFloat(data_ret_iva);// iva * retencion IVA
+		var calc_retrentas = data_subtotal * parseFloat(data_ret_rentas);// subtotal * retencion rentas
+		var calc_ret_total = calc_retiva + calc_retrentas; // retención iva + retención rentas
+		
+		// total de pago
+		var calc_total = calc_subtotal_iva - calc_ret_total; // (subtotal + IVA) - total retenciones
+			
+		// Text Returns
+		$("#invoice_iva_total").val(calc_iva.toFixed(2)); // Return IVA % to box: invoice_iva_total
+		$("#invoice_total").val(calc_subtotal_iva.toFixed(2)); // Return (subtotal + iva) to box: invoice_total
+		$("#invoice_retiva_value").val(calc_retiva.toFixed(2)); // Return (iva * retencion IVA)
+		$("#invoice_retrentas_value").val(calc_retrentas.toFixed(2)); // Return (iva * retencion IVA)
+		$("#invoice_retencion_total").val(calc_ret_total.toFixed(2)); // Return (iva * retencion IVA)
+		$("#invoice_pay_total").val(calc_total.toFixed(2)); // subtotal - total retenciones
+		// $("#debug").val(data_subtotal); // for debug purposes
+}
+
+
+function calcSubTotal() {
+		// User Input
+		data_pay_total2 = $("#invoice_pay_total2").val(); // get data from box: invoice_pay_total2
+		data_iva2 = $("#invoice_iva2").val(); // get data from box: invoice_iva  %IVA
+		data_ret_iva2 = $("#invoice_ret_iva2").val(); // get data from box: invoice_ret_iva    %Retencion IVA
+		data_ret_rentas2 = $("#invoice_ret_rentas2").val(); // get data from box: invoice_ret_rentas %Retencion Rentas
+
+		// Base calc
+		// Subtotal Example = (Valor del Cheque) / (1 + 0.12 - (0.12 * 1) - 0.10)
+		// Subtotal Formula = (Valor del Cheque) / (1 + [IVA] - ([IVA] * [Retención IVA]) - [Retencion])
+		var calc_base_value2 = parseFloat(data_pay_total2) / ( 1 + parseFloat(data_iva2) - parseFloat(data_iva2) * parseFloat(data_ret_iva2) - parseFloat(data_ret_rentas2)) 
+		var data_subtotal2 = calc_base_value2;
+		
+		// IVA Calc
+		var calc_iva2 = data_subtotal2 * data_iva2; // calc IVA
+		var calc_subtotal_iva2 = parseFloat(data_subtotal2) + parseFloat(calc_iva2); // subtotal + iva
+		
+		// Retención calc
+		var calc_retiva2 = parseFloat(calc_iva2) * parseFloat(data_ret_iva2);// iva * retencion IVA
+		var calc_retrentas2 = data_subtotal2 * parseFloat(data_ret_rentas2);// subtotal * retencion rentas
+		var calc_ret_total2 = calc_retiva2 + calc_retrentas2; // retención iva + retención rentas
+		
+		// Text Returns
+		$("#invoice_subtotal2").val(data_subtotal2.toFixed(2));
+		$("#invoice_iva_total2").val(calc_iva2.toFixed(2)); // Return IVA % to box: invoice_iva_total
+		$("#invoice_total2").val(calc_subtotal_iva2.toFixed(2)); // Return (subtotal + iva) to box: invoice_total
+		$("#invoice_retiva_value2").val(calc_retiva2.toFixed(2)); // Return (iva * retencion IVA)
+		$("#invoice_retrentas_value2").val(calc_retrentas2.toFixed(2)); // Return (iva * retencion IVA)
+		$("#invoice_retencion_total2").val(calc_ret_total2.toFixed(2)); // Return (iva * retencion IVA)
+}
+</script>
+</head>
+<body>
+<h1>Cálculo de Retenciones</h1>
+<p>
+Esta página le permitirá realizar el cálculo para llenar una
+ factura y llenar un comprobante de retención.
+Además facilitará el cálculo del valor a pagar o recibir despues de retenciones.
+</p>
+<p>Usted tiene dos formas de cálculo:</p>
+<p><span style="font-weight: bold;">1.</span> 
+Ingrese el valor del subtotal de la factura, escoja los valores de 
+retención según lo que dice la ley y tendrá el valor del pago o cheque a
+ recibir después de retenciones.</p>
+<p><span style="font-weight: bold;">2.</span> 
+Ingrese el valor que espera recibir después de retenciones, escoja las 
+retenciones de ley y obtendrá el valor que de el subtotal de la factura.</p>
+
+<h2>Calcular Impuestos</h2>
+Subtotal de Factura:
+<input id="invoice_subtotal" type="text">
+<br>
+IVA 
+<select id="invoice_iva">
+  <option selected value="0.12">12%</option>
+  <option value="0.14">14%</option>
+  <option value="0">0</option>
+</select> 
+<br>
+Valor IVA: 
+<input id="invoice_iva_total" type="text" readonly>
+<br>
+<b>Total Factura:</b> 
+<input id="invoice_total" type="text" readonly>
+<br>
+<br>
+Retención IVA 
+<select id="invoice_ret_iva">
+  <option selected value="1">100%</option>
+  <option value="0.7">70%</option>
+  <option value="0.3">30%</option>
+  <option value="0.2">20%</option>
+  <option value="0.1">10%</option>
+  <option value="0">0</option>
+</select> 
+<br>
+Valor Retención IVA: 
+<input id="invoice_retiva_value" type="text" readonly>
+<br>
+Retención Rentas 
+<select id="invoice_ret_rentas">
+  <option value="0">0%</option>
+  <option value="0.01">1%</option>
+  <option value="0.02">2%</option>
+  <option value="0.08">8%</option>
+  <option selected value="0.1">10%</option>
+    <option value="0.22">22%</option>
+</select> 
+<br>
+Valor Retención Rentas: 
+<input id="invoice_retrentas_value" type="text" readonly>
+<br>
+Total Retención: 
+<input id="invoice_retencion_total" type="text" readonly>
+<br>
+<br>
+<b>Total del Cheque: 
+<input id="invoice_pay_total" type="text" readonly></b>
+<br>
+<input id="button_calc" type="button" value="Calcular" onclick="calcIVA();" />
+<br>
+
+<!-------------------------------------------------------------------------------------------->
+<!-------------------------------------------------------------------------------------------->
+<!-------------------------------------------------------------------------------------------->
+<h2>Calcular Subtotal</h2>
+Subtotal de Factura:
+<input id="invoice_subtotal2" type="text" readonly>
+<br>
+IVA 
+<select id="invoice_iva2">
+  <option selected value="0.12">12%</option>
+  <option value="0.14">14%</option>
+  <option value="0">0</option>
+</select> 
+<br>
+Valor IVA: 
+<input id="invoice_iva_total2" type="text" readonly>
+<br>
+<b>Total Factura:</b> 
+<input id="invoice_total2" type="text" readonly>
+<br>
+<br>
+Retención IVA 
+<select id="invoice_ret_iva2">
+  <option selected value="1">100%</option>
+  <option value="0.7">70%</option>
+  <option value="0.3">30%</option>
+  <option value="0.2">20%</option>
+  <option value="0.1">10%</option>
+  <option value="0">0</option>
+</select> 
+<br>
+Valor Retención IVA: 
+<input id="invoice_retiva_value2" type="text" readonly>
+<br>
+Retención Rentas 
+<select id="invoice_ret_rentas2">
+  <option value="0">0%</option>
+  <option value="0.01">1%</option>
+  <option value="0.02">2%</option>
+  <option value="0.08">8%</option>
+  <option selected value="0.1">10%</option>
+    <option value="0.22">22%</option>
+</select> 
+<br>
+Valor Retención Rentas: 
+<input id="invoice_retrentas_value2" type="text" readonly>
+<br>
+Total Retención: 
+<input id="invoice_retencion_total2" type="text" readonly>
+<br>
+<br>
+<b>Total del Cheque: 
+<input id="invoice_pay_total2" type="text"></b>
+<br>
+<input id="button_calc2" type="button" value="Calcular" onclick="calcSubTotal();" />
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-------------------------------------------------------------------------------------------->
+<!-------------------------------------------------------------------------------------------->
+<!-------------------------------------------------------------------------------------------->
+
+<h3>
+Para Empresas
+</h3>
+<p>
+Si su empresa contrata los servicios de un profesional (Título refrendado en el CONESUP), se retiene:
+</p>
+<div style="text-indent: 20px;">
+	100% IVA
+</div>
+<div style="text-indent: 20px;">
+	10% de Impuesto a la Renta
+</div>
+<p>
+Si su empresa contrata los servicios a personas naturales donde prima el intelecto se retiene:
+</p>
+<div style="text-indent: 20px;">
+	100% IVA
+</div>
+<div style="text-indent: 20px;">
+	8% de Impuesto a la Renta
+</div>
+<p>
+Si su empresa contrata servicios a personas naturales donde predomina la mano de obra:
+</p>
+<div style="text-indent: 20px;">
+	70% IVA
+</div>
+<div style="text-indent: 20px;">
+	2% de Impuesto a la Renta
+</div>
+<p>
+Si su empresa compra bienes (suministros, materiales, etc) a personas naturales:
+</p>
+<div style="text-indent: 20px;">
+	30% IVA
+</div>
+<div style="text-indent: 20px;">
+	1% de Impuesto a la Renta
+</div>
+
+</body>
+</html>
